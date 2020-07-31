@@ -11,6 +11,7 @@ const { login, createUser } = require('./controllers/user');
 const auth = require('./middlewares/auth');
 const notFound = require('./errors/notfound');
 const { errors } = require('celebrate');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 const { PORT = 3000 } = process.env;
 mongoose.connect('mongodb://localhost:27017/mestodb', {
@@ -18,6 +19,8 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
   useCreateIndex: true,
   useFindAndModify: false,
 });
+
+app.use(requestLogger);
 
 app.post('/signin', login);
 app.post('/signup', createUser);
@@ -28,6 +31,8 @@ app.use('/cards', cardRout);
 app.use('/*', (req, res, next) => {
   next (new notFound('Запрашиваемый ресурс не найден'));
 });
+
+app.use(errorLogger);
 
 app.use(errors()); 
 
