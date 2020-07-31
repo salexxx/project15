@@ -1,27 +1,29 @@
 const сard = require('../models/card');
+const notFound = require('../errors/notfound');
+const Forbidden = require('../errors/forbidden');
 
-module.exports.getCards = (req, res) => {
+module.exports.getCards = (req, res, next) => {
   сard
     .find({})
     .then((cards) => res.status(200).send({ data: cards }))
-    .catch((err) => res.status(404).send({ data: err.message }));
+    .catch(next);
 };
-module.exports.createCard = (req, res) => {
+module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
   сard
     .create({ name, link, owner: req.user._id })
     .then((cards) => res.status(200).send({ data: cards }))
-    .catch((err) => res.status(500).send({ data: err.message }));
+    .catch(next);
 };
-module.exports.deleteCard = (req, res) => {
+module.exports.deleteCard = (req, res, next) => {
   сard
-    .findOne({ _id: req.params.cardId }).orFail(() => new Error('Нет такой карточки'))
+    .findOne({ _id: req.params.cardId }).orFail( new notFound('Нет такой карточки'))
     .then(async (cardobj) => {
       if (cardobj.owner.toString() !== req.user._id) {
-        return res.status(403).send({ message: 'Удалять не свои карточки нельзя' });
+        throw new Forbidden('Удалять не свои карточки нельзя');
       }
       await cardobj.remove();
       return res.status(200).send({ message: 'Карточка удалена' });
     })
-    .catch((err) => res.status(404).send({ err, message: err.message }));
+    .catch(next);
 };

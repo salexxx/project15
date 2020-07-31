@@ -25,10 +25,10 @@ app.use('/users', userRout);
 app.use('/cards', cardRout);
 
 app.use('/*', (req, res, next) => {
-  next (new notFound({ message: 'Запрашиваемый ресурс не найден' }));
+  next (new notFound('Запрашиваемый ресурс не найден'));
 });
 
-app.use((err, req, res, next) => {
+ app.use((err, req, res, next) => {
   const { statusCode = 500, message } = err;
   res
       .status(statusCode)
@@ -37,7 +37,7 @@ app.use((err, req, res, next) => {
               ? 'На сервере произошла ошибка'
               : message
       });
-});
+}); 
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
