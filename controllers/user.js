@@ -1,14 +1,15 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const user = require('../models/user');
+const notFound = require('../errors/notfound');
 
-module.exports.getUsers = (req, res) => {
+module.exports.getUsers = (req, res, next) => {
   user.find({})
     .then((users) => res.send({ data: users }))
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch(next);
 };
 
-module.exports.createUser = (req, res) => {
+module.exports.createUser = (req, res, next) => {
   bcrypt.hash(req.body.password, 10)
     .then((hash) => user.create({
       email: req.body.email,
@@ -22,17 +23,17 @@ module.exports.createUser = (req, res) => {
         name: users.name, about: users.about, avatar: users.avatar, email: users.email,
       },
     }))
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch(next);
 };
 
-module.exports.getUser = (req, res) => {
+module.exports.getUser = (req, res, next) => {
   user
-    .findById(req.params.id).orFail()
+    .findById(req.params.id).orFail(new notFound('Пользователь не найден'))
     .then((someuser) => res.send({ data: someuser }))
-    .catch((err) => res.status(404).send({ err, message: 'Пользователь не найден' }));
+    .catch(next);
 };
 
-module.exports.login = (req, res) => {
+module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
   return user.findUserByCredentials(email, password)
     .then((usr) => {
