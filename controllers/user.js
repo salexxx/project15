@@ -16,7 +16,7 @@ module.exports.createUser = (req, res, next) => {
   const {
     email, password, name, about, avatar,
   } = req.body;
-  if (!name || !password || password.length < 6) {
+  if (!name || !password || password.length < 6 || name.match(/^[ ]+$/)) {
     throw new BadRequest('Ведите имя и пароль не меньше 6 символов');
   }
   bcrypt.hash(password, 10)
