@@ -11,6 +11,7 @@
 
 Описание API
 
+
 [http://api.mestoapp.ga/signup](http://api.mestoapp.ga/signup) - (POST) Зарегистрировать нового пользователя
 
 [http://api.mestoapp.ga/signin](http://api.mestoapp.ga/signin) - (POST) Авторизация пользователя
