@@ -5,12 +5,12 @@ const bodyParser = require('body-parser');
 const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+const { errors } = require('celebrate');
 const userRout = require('./routes/users');
 const cardRout = require('./routes/cards');
 const { login, createUser } = require('./controllers/user');
 const auth = require('./middlewares/auth');
-const notFound = require('./errors/notfound');
-const { errors } = require('celebrate');
+const NotFound = require('./errors/notfound');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 const { PORT = 3000 } = process.env;
@@ -29,23 +29,24 @@ app.use('/users', userRout);
 app.use('/cards', cardRout);
 
 app.use('/*', (req, res, next) => {
-  next (new notFound('Запрашиваемый ресурс не найден'));
+  next(new NotFound('Запрашиваемый ресурс не найден'));
 });
 
 app.use(errorLogger);
 
-app.use(errors()); 
+app.use(errors());
 
- app.use((err, req, res, next) => {
+// eslint-disable-next-line no-unused-vars
+app.use((err, req, res, next) => {
   const { statusCode = 500, message } = err;
   res
-      .status(statusCode)
-      .send({
-          message: statusCode === 500
-              ? 'На сервере произошла ошибка'
-              : message
-      });
-}); 
+    .status(statusCode)
+    .send({
+      message: statusCode === 500
+        ? 'На сервере произошла ошибка'
+        : message,
+    });
+});
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
