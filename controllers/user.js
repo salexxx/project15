@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const regexUrl = require('../regexUrl');
 
 const { NODE_ENV, JWT_SECRET } = process.env;
 const user = require('../models/user');
@@ -16,6 +17,9 @@ module.exports.createUser = (req, res, next) => {
   const {
     email, password, name, about, avatar,
   } = req.body;
+  if (!avatar.match(regexUrl)) {
+    throw new BadRequest('В поле аватар должна быть ссылка');
+  }
   if (!name || !password || password.length < 6 || name.match(/^[ ]+$/)) {
     throw new BadRequest('Ведите имя и пароль не меньше 6 символов');
   }
