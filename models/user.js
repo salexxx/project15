@@ -16,6 +16,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
     select: false,
+    minlength: 6,
   },
   name: {
     type: String,
@@ -38,6 +39,7 @@ const userSchema = new mongoose.Schema({
     required: true,
   },
 });
+// eslint-disable-next-line func-names
 userSchema.statics.findUserByCredentials = function (email, password) {
   return this.findOne({ email }).select('+password')
     .then((user) => {
@@ -47,7 +49,7 @@ userSchema.statics.findUserByCredentials = function (email, password) {
       return bcrypt.compare(password, user.password)
         .then((matched) => {
           if (!matched) {
-            return Promise.reject(new Error('неправильные почта иил пароль'));
+            return Promise.reject(new Error('неправильные почта или пароль'));
           }
           return (user);
         });

@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const { NODE_ENV, JWT_SECRET } = process.env;
 const user = require('../models/user');
 const NotFound = require('../errors/notfound');
+const BadRequest = require('../errors/badrequest');
 
 module.exports.getUsers = (req, res, next) => {
   user.find({})
@@ -12,19 +13,31 @@ module.exports.getUsers = (req, res, next) => {
 };
 
 module.exports.createUser = (req, res, next) => {
-  bcrypt.hash(req.body.password, 10)
+  const {
+    email, password, name, about, avatar,
+  } = req.body;
+
+  if (!name || !password || password.length < 6 || name.match(/^[ ]+$/)) {
+    throw new BadRequest('Ведите имя и пароль не меньше 6 символов');
+  }
+  bcrypt.hash(password, 10)
     .then((hash) => user.create({
-      email: req.body.email,
+      email,
       password: hash,
-      name: req.body.name,
-      about: req.body.about,
-      avatar: req.body.avatar,
+      name,
+      about,
+      avatar,
     }))
     .then((users) => res.status(200).send({
       data: {
         name: users.name, about: users.about, avatar: users.avatar, email: users.email,
       },
     }))
+    .catch((err) => {
+      if (err.code === 11000) {
+        throw new BadRequest('Пользователь с таким email уже зарегистрирован');
+      }
+    })
     .catch(next);
 };
 
