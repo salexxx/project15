@@ -16,6 +16,7 @@ const { login, createUser } = require('./controllers/user');
 const auth = require('./middlewares/auth');
 const NotFound = require('./errors/notfound');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
+const regexUrl = require('./regexUrl');
 
 const { PORT = 3000 } = process.env;
 mongoose.connect('mongodb://localhost:27017/mestodb', {
@@ -52,7 +53,7 @@ app.post('/signup',
       password: Joi.string().required().min(6),
       name: Joi.string().required().min(2).max(30),
       about: Joi.string().required().min(2).max(30),
-      avatar: Joi.string().required(),
+      avatar: Joi.string().pattern(regexUrl).required(),
     }),
   }),
   createUser);
